@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from calculators import deck_calc
-from constants.constants import NUMBER_OF_DECKS
-from calculators import best_play_calc
-from calculators import dealer
+from app.calculators import deck_calc
+from app.constants.constants import NUMBER_OF_DECKS
+from app.calculators import best_play_calc
+from app.calculators import dealer
 import logging
 
 app = FastAPI()
@@ -32,7 +32,7 @@ async def dealRandomPlayerCard():
      return dealer.dealRandomPlayerCard(current_deck, player_cards)
 
 @app.post("/deal/random/deal_dealer_card")
-async def dealRandomPlayerCard():
+async def dealRandomDealerCard():
      return dealer.dealRandomDealerCard(current_deck, dealer_cards)
 
 @app.put("/reset/player_dealer_hands")
@@ -40,4 +40,12 @@ async def resetPlayerDealerhands():
      global player_cards, dealer_cards
      player_cards = []
      dealer_cards = []
+     return "OK"
+
+@app.put("/reset/shoe")
+async def resetPlayerDealerhands():
+     global player_cards, dealer_cards, current_deck
+     player_cards = []
+     dealer_cards = []
+     current_deck = deck_calc.buildDeck(NUMBER_OF_DECKS)
      return "OK"
