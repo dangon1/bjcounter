@@ -1,6 +1,5 @@
-
 from fastapi import FastAPI
-from calculators.deck_calc import deck_builder
+from calculators import deck_calc
 from constants.constants import NUMBER_OF_DECKS
 from calculators import best_play_calc
 from calculators import dealer
@@ -8,13 +7,13 @@ import logging
 
 app = FastAPI()
 
-current_deck = {}
+current_deck = []
+player_cards = []
+dealer_cards = []
 
 def on_startup():
-    logging.error("called here")
     global current_deck
-    current_deck = deck_builder(NUMBER_OF_DECKS)
-    logging.error(current_deck)
+    current_deck = deck_calc.buildDeck(NUMBER_OF_DECKS)
 
 @app.on_event("startup")
 async def startup_event():
@@ -22,12 +21,23 @@ async def startup_event():
 
 @app.get("/calc/best_play")
 async def calcBestPlayContract():
-     return best_play_calc.calcBestPlay(current_deck, ["2","3"],"3")
+     return best_play_calc.calcBestPlay(current_deck, player_cards, dealer_cards)
 
-@app.get("/calc/current_deck")
-async def getCurrentDeck():
-     return { "size": len(current_deck), "deck": tuple(current_deck) }
+@app.get("/calc/game_state")
+async def getGameState():
+     return deck_calc.getGameState(current_deck, player_cards, dealer_cards)
 
-@app.get("/calc/deal_player_card")
-async def dealPlayerCard():
-     return dealer.dealPlayerCard(current_deck)
+@app.post("/deal/random/deal_player_card")
+async def dealRandomPlayerCard():
+     return dealer.dealRandomPlayerCard(current_deck, player_cards)
+
+@app.post("/deal/random/deal_dealer_card")
+async def dealRandomPlayerCard():
+     return dealer.dealRandomDealerCard(current_deck, dealer_cards)
+
+@app.put("/reset/player_dealer_hands")
+async def resetPlayerDealerhands():
+     global player_cards, dealer_cards
+     player_cards = []
+     dealer_cards = []
+     return "OK"
