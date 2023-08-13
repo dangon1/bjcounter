@@ -1,0 +1,14 @@
+.vscode
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+# Virtual env
+/bjvenv
+
+# Python
+*/__pycache__
+__pycache__
