@@ -10,7 +10,7 @@ class TestCardDealing(unittest.TestCase):
     def test_dealRandomPlayerCard(self):
         current_deck = ["A-S", "K-H", "Q-D", "J-C"]
         player_cards = []
-        dealt_card = dealer.dealRandomPlayerCard(current_deck, player_cards)
+        dealt_card = dealer.deal_random_player_card(current_deck, player_cards)
 
         self.assertEqual(len(player_cards), 1)
         self.assertEqual(player_cards[0], dealt_card)
@@ -19,7 +19,7 @@ class TestCardDealing(unittest.TestCase):
     def test_dealRandomDealerCard(self):
         current_deck = ["A-S", "K-H", "Q-D", "J-C"]
         dealer_cards = []
-        dealt_cards = dealer.dealRandomDealerCard(current_deck, dealer_cards)
+        dealt_cards = dealer.deal_random_dealer_card(current_deck, dealer_cards)
 
         self.assertEqual(dealer_cards, dealt_cards)
         self.assertEqual(len(dealer_cards), len(dealt_cards))
