@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+
+from app.admin import admin
 from app.calculators import deck_calc
 from app.constants.constants import NUMBER_OF_DECKS
 from app.calculators import best_play_calc
@@ -16,17 +18,20 @@ cur_comp = CurComp(deck_calc.build_deck(NUMBER_OF_DECKS))
 def on_startup():
      global cur_comp
      cur_comp = CurComp(deck_calc.build_deck(NUMBER_OF_DECKS))
-     logging.error("after start" + str(len(cur_comp.cur_deck)))
-     logging.error("rank 2 " + str(cur_comp.get_qty_rank("2")))
 
 @app.on_event("startup")
 async def startup_event():
     on_startup()
 
+@app.get("/admin/show_matrixes")
+async def calc_best_play_contract():
+     global cur_comp
+     return admin.show_matrixes(cur_comp)
+
 @app.get("/calc/best_play")
 async def calc_best_play_contract():
      global cur_comp
-     return best_play_calc.calc_best_play(cur_comp.get_dealer_probs(), player_cards, dealer_cards)
+     return best_play_calc.calc_best_play(cur_comp, player_cards, dealer_cards)
 
 @app.get("/calc/game_state")
 async def get_game_state():

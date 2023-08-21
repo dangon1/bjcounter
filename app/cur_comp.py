@@ -53,6 +53,10 @@ class CurComp:
 
         return result / 13
 
+    def show_matrixes(self):
+        self.get_dealer_probs()
+        self.get_stand_probs()
+
     def get_dealer_probs(self):
         # Set display options to show all rows and columns
         # pd.set_option('display.max_rows', None)
@@ -67,7 +71,7 @@ class CurComp:
             "21": [0] * 15 + [0] + [0] + [0] + [0] + [1] + [0] * 10
         }
         # Therefore df_transposed[3][5] is column 3, line 5
-        df_t_hard = pd.DataFrame(dealer_hard).transpose()
+        df_t_hard = pd.DataFrame(dealer_hard).T
 
         # print(df_t_hard)
 
@@ -101,3 +105,48 @@ class CurComp:
         # Save the DataFrames to CSV files
         df_t_hard.to_csv('df_t_hard.csv', index=False)
         df_t_soft.to_csv('df_t_soft.csv', index=False)
+
+    def get_stand_probs(self):
+        stand_hard = {
+            "Hard": list(range(2, 11)) + ["Ace"],
+            "4": [0] * 10,
+            "5": [0] * 10,
+            "6": [0] * 10,
+            "7": [0] * 10,
+            "8": [0] * 10,
+            "9": [0] * 10,
+            "11": [0] * 10,
+            "12": [0] * 10,
+            "13": [0] * 10,
+            "14": [0] * 10,
+            "15": [0] * 10,
+            "16": [0] * 10,
+            "17": [0] * 10,
+            "18": [0] * 10,
+            "19": [0] * 10,
+            "20": [0] * 10,
+            "21": [0] * 10,
+            "22": [-1] * 10,
+            "23": [-1] * 10,
+            "24": [-1] * 10,
+            "25": [-1] * 10,
+            "26": [-1] * 10,
+            "27": [-1] * 10,
+            "28": [-1] * 10,
+            "29": [-1] * 10,
+            "30": [-1] * 10,
+            "31": [-1] * 10
+        }
+
+        stand_hard = pd.DataFrame(stand_hard).T
+
+        for j in range(0, 10, 1):
+            for i in range(1, 23):
+                self.get_prob_stand_hard(stand_hard, j, i)
+
+        print("STAND_HARD")
+        print(stand_hard)
+
+    def get_prob_stand_hard(self, stand_hard, idx_j, idx_i):
+        # TODO do the calculation here. On spreadsheet is using american dealer odds, may need to redo dealer matrix
+        stand_hard[idx_j][idx_i] = "X"
