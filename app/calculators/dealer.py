@@ -12,11 +12,14 @@ def deal_random_dealer_card(current_deck, dealer_cards):
     dealer_cards.append(dealt_card)
     return dealer_cards
 
-def deal_specific_player_card(current_deck, player_cards, rank, suit):
-    card_to_remove = Card(rank, suit)
+def deal_specific_player_card(cur_comp, player_cards, rank, suit):
+    if suit is None:
+        card_to_remove = cur_comp.get_next_card_of_rank(rank)
+    else:
+        card_to_remove = Card(rank, suit)
     try:
-        index_to_remove = current_deck.index(card_to_remove)
-        dealt_card = current_deck.pop(index_to_remove)
+        index_to_remove = cur_comp.cur_deck.index(card_to_remove)
+        dealt_card = cur_comp.cur_deck.pop(index_to_remove)
         player_cards.append(dealt_card)
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Card {card_to_remove} not found")

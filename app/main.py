@@ -42,7 +42,7 @@ async def deal_random_dealer_card():
 
 @app.post("/deal/specific/deal_player_card")
 async def deal_specific_player_card(rank:str, suit: str | None = None):
-     return dealer.deal_specific_player_card(cur_comp.cur_deck, player_cards, rank, suit)
+     return dealer.deal_specific_player_card(cur_comp, player_cards, rank, suit)
 
 @app.put("/reset/player_dealer_hands")
 async def reset_player_dealer_hands():

@@ -11,6 +11,12 @@ class CurComp:
         rank_qty = len([card.rank for card in self.cur_deck if card.rank in rank])
         return rank_qty
 
+    def get_next_card_of_rank(self, rank):
+        for card in self.cur_deck:
+            if card.rank is rank:
+                return card
+        return None
+
     def get_normalized_prob_rank(self, rank):
         if rank == "T":
             rank_qty = self.get_qty_rank("10") \
