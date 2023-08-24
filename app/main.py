@@ -7,7 +7,6 @@ from app.calculators import best_play_calc
 from app.calculators import dealer
 from app.cur_comp import CurComp
 
-import logging
 
 app = FastAPI()
 
@@ -24,9 +23,14 @@ async def startup_event():
     on_startup()
 
 @app.get("/admin/show_matrixes")
-async def calc_best_play_contract():
+async def show_matrixes():
      global cur_comp
      return admin.show_matrixes(cur_comp)
+
+@app.get("/admin/prob_bust")
+async def prob_bust():
+     global cur_comp
+     return deck_calc.calc_all_probs_dealer(cur_comp, dealer_cards)
 
 @app.get("/calc/best_play")
 async def calc_best_play_contract():
@@ -48,6 +52,10 @@ async def deal_random_dealer_card():
 @app.post("/deal/specific/deal_player_card")
 async def deal_specific_player_card(rank:str, suit: str | None = None):
      return dealer.deal_specific_player_card(cur_comp, player_cards, rank, suit)
+
+@app.post("/deal/specific/deal_dealer_card")
+async def deal_specific_dealer_card(rank:str, suit: str | None = None):
+     return dealer.deal_specific_player_card(cur_comp, dealer_cards, rank, suit)
 
 @app.put("/reset/player_dealer_hands")
 async def reset_player_dealer_hands():

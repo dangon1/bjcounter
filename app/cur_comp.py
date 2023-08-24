@@ -2,7 +2,6 @@ import pandas as pd
 
 from app.constants.constants import UNITY_NORMALIZED_RANK
 
-
 class CurComp:
     def __init__(self, cur_deck):
         self.cur_deck = cur_deck
@@ -18,15 +17,18 @@ class CurComp:
         return None
 
     def get_normalized_prob_rank(self, rank):
-        if rank == "T":
+        return self.get_prob_rank(rank) / UNITY_NORMALIZED_RANK
+
+    def get_prob_rank(self, rank):
+        if rank == "T" or rank == "10":
             rank_qty = self.get_qty_rank("10") \
                        + self.get_qty_rank("J") \
                        + self.get_qty_rank("Q") \
                        + self.get_qty_rank("K")
         else:
             rank_qty = self.get_qty_rank(rank)
-        normalized_rank = (rank_qty / len(self.cur_deck)) / UNITY_NORMALIZED_RANK
-        return normalized_rank
+        prob_rank = (rank_qty / len(self.cur_deck))
+        return prob_rank
 
     def get_prob_hard_total(self, df_t_hard, df_t_soft, idx_column_hard_total, idx_row_hard_total):
         ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "A"]
@@ -73,8 +75,6 @@ class CurComp:
         # Therefore df_transposed[3][5] is column 3, line 5
         df_t_hard = pd.DataFrame(dealer_hard).T
 
-        # print(df_t_hard)
-
         dealer_soft = {
             "Outcome": list(range(12, 32)),
             "Bust": [0] * 5 + [0] + [0] + [0] + [0] + [0] + [0] * 5 + [0] + [0] + [0] + [0] + [0],
@@ -87,7 +87,6 @@ class CurComp:
 
         # Therefore df_transposed[3][5] is column 3, line 5
         df_t_soft = pd.DataFrame(dealer_soft).T
-        # print(df_t_soft)
 
         for j in range(14, -1, -1):
             for i in range(1, 7):
@@ -103,8 +102,9 @@ class CurComp:
         print(df_t_soft)
 
         # Save the DataFrames to CSV files
-        df_t_hard.to_csv('df_t_hard.csv', index=False)
-        df_t_soft.to_csv('df_t_soft.csv', index=False)
+        # df_t_hard.to_csv('df_t_hard.csv', index=False)
+        # df_t_soft.to_csv('df_t_soft.csv', index=False)
+        return df_t_hard
 
     def get_stand_probs(self):
         stand_hard = {
