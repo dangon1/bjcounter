@@ -1,9 +1,7 @@
 import random
-from fastapi import HTTPException
 from typing import List
 
 ACE_VALUE_11 = 11
-
 ACE_VALUE_1 = 1
 
 
@@ -81,34 +79,3 @@ def calc_sum_hand_ace_(cards, ace_value):
         rank_value = calc_card_value(card, ace_value)
         sum_cards += rank_value
     return sum_cards
-
-
-def calc_prob_dealer_bust_next_card(cur_comp, dealer_cards):
-    sum_dealer_cards = calc_sum_hand(dealer_cards)
-    if sum_dealer_cards >= 22:
-        return 1
-    elif 17 <= sum_dealer_cards < 22:
-        return 0
-    else:
-        distance_from_22 = 22 - sum_dealer_cards
-        if distance_from_22 > 10:
-            return 0
-        prob_busting = 0
-        for i in range(distance_from_22, 11):
-            print("calculating prob of i " + str(i))
-            prob_busting += cur_comp.get_normalized_prob_rank(str(i))
-            print("prob of i:  " + str(prob_busting))
-        return prob_busting / 13
-
-
-def calc_all_probs_dealer(cur_comp, dealer_cards):
-    sum_dealer_cards = calc_sum_hand(dealer_cards)
-    if sum_dealer_cards < 2:
-        raise HTTPException(status_code=400, detail=f"Dealer hasn't been dealt any cards.")
-    prob_bust = cur_comp.get_dealer_probs().iloc[1, int(sum_dealer_cards - 2)]
-    prob_17 = cur_comp.get_dealer_probs().iloc[2, int(sum_dealer_cards - 2)]
-    prob_18 = cur_comp.get_dealer_probs().iloc[3, int(sum_dealer_cards - 2)]
-    prob_19 = cur_comp.get_dealer_probs().iloc[4, int(sum_dealer_cards - 2)]
-    prob_20 = cur_comp.get_dealer_probs().iloc[5, int(sum_dealer_cards - 2)]
-    prob_21 = cur_comp.get_dealer_probs().iloc[6, int(sum_dealer_cards - 2)]
-    return { "Bust:": prob_bust, "17": prob_17, "18": prob_18, "19": prob_19, "20": prob_20, "21": prob_21 }

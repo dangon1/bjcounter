@@ -7,7 +7,6 @@ from app.calculators import best_play_calc
 from app.calculators import dealer
 from app.cur_comp import CurComp
 
-
 app = FastAPI()
 
 player_cards = []
@@ -25,12 +24,13 @@ async def startup_event():
 @app.get("/admin/show_matrixes")
 async def show_matrixes():
      global cur_comp
-     return admin.show_matrixes(cur_comp)
+     return admin.show_matrixes(cur_comp, dealer_cards)
 
 @app.get("/admin/prob_bust")
 async def prob_bust():
      global cur_comp
-     return deck_calc.calc_all_probs_dealer(cur_comp, dealer_cards)
+     sum_dealer_cards = deck_calc.calc_sum_hand(dealer_cards)
+     return cur_comp.calc_all_probs_dealer(sum_dealer_cards)
 
 @app.get("/calc/best_play")
 async def calc_best_play_contract():

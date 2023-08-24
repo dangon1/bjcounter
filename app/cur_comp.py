@@ -1,6 +1,9 @@
 import pandas as pd
+from fastapi import HTTPException
 
-from app.constants.constants import UNITY_NORMALIZED_RANK
+from app.calculators import deck_calc
+from app.constants.constants import UNITY_NORMALIZED_RANK, PEAKS_FOR_BJ
+
 
 class CurComp:
     def __init__(self, cur_deck):
@@ -55,9 +58,9 @@ class CurComp:
 
         return result / 13
 
-    def show_matrixes(self):
+    def show_matrixes(self, dealer_cards):
         self.get_dealer_probs()
-        self.get_stand_probs()
+        self.get_stand_probs(dealer_cards)
 
     def get_dealer_probs(self):
         # Set display options to show all rows and columns
@@ -91,6 +94,9 @@ class CurComp:
         for j in range(14, -1, -1):
             for i in range(1, 7):
                 hard_total = self.get_prob_hard_total(df_t_hard, df_t_soft, j, i)
+                if PEAKS_FOR_BJ:
+                    # FIX to use american peaking rule on dealer for 10s and Aces
+                    print("hey")
                 df_t_hard.iloc[(i, j)] = hard_total
                 if j >= 10:
                     df_t_soft.iloc[(i, j)] = hard_total
@@ -104,9 +110,11 @@ class CurComp:
         # Save the DataFrames to CSV files
         # df_t_hard.to_csv('df_t_hard.csv', index=False)
         # df_t_soft.to_csv('df_t_soft.csv', index=False)
+
+
         return df_t_hard
 
-    def get_stand_probs(self):
+    def get_stand_probs(self, dealer_cards):
         stand_hard = {
             "Hard": list(range(2, 11)) + ["Ace"],
             "4": [0] * 10,
@@ -141,12 +149,55 @@ class CurComp:
         stand_hard = pd.DataFrame(stand_hard).T
 
         for j in range(0, 10, 1):
-            for i in range(1, 23):
-                self.get_prob_stand_hard(stand_hard, j, i)
+            probs_for_rank = self.calc_all_probs_dealer(j+2)
+            for i in range(1, 16 - 3):
+                get_prob_stand_until_16(probs_for_rank, stand_hard, j, i)
 
         print("STAND_HARD")
         print(stand_hard)
 
-    def get_prob_stand_hard(self, stand_hard, idx_j, idx_i):
-        # TODO do the calculation here. On spreadsheet is using american dealer odds, may need to redo dealer matrix
-        stand_hard[idx_j][idx_i] = "X"
+    # method not used anywhere yet
+    def calc_prob_dealer_bust_next_card(self, dealer_cards):
+        sum_dealer_cards = deck_calc.calc_sum_hand(dealer_cards)
+        if sum_dealer_cards >= 22:
+            return 1
+        elif 17 <= sum_dealer_cards < 22:
+            return 0
+        else:
+            distance_from_22 = 22 - sum_dealer_cards
+            if distance_from_22 > 10:
+                return 0
+            prob_busting = 0
+            for i in range(distance_from_22, 11):
+                print("calculating prob of i " + str(i))
+                prob_busting += self.get_normalized_prob_rank(str(i))
+                print("prob of i:  " + str(prob_busting))
+            return prob_busting / 13
+
+    def calc_all_probs_dealer(self, sum_dealer_cards):
+        if sum_dealer_cards < 2:
+            raise HTTPException(status_code=400, detail=f"Dealer hasn't been dealt any cards.")
+        dealer_probs = self.get_dealer_probs()
+        prob_bust = dealer_probs.iloc[1, int(sum_dealer_cards - 2)]
+        prob_17 = dealer_probs.iloc[2, int(sum_dealer_cards - 2)]
+        prob_18 = dealer_probs.iloc[3, int(sum_dealer_cards - 2)]
+        prob_19 = dealer_probs.iloc[4, int(sum_dealer_cards - 2)]
+        prob_20 = dealer_probs.iloc[5, int(sum_dealer_cards - 2)]
+        prob_21 = dealer_probs.iloc[6, int(sum_dealer_cards - 2)]
+        return {"bust": prob_bust, "17": prob_17, "18": prob_18, "19": prob_19, "20": prob_20, "21": prob_21}
+
+def get_prob_stand_until_16(probs_for_rank, stand_hard, idx_j, idx_i):
+    # Get the probability of the dealer going Bust
+    prob_bust = probs_for_rank.get("bust")
+
+    # Get the sum of probabilities for dealer scores 17 through 21
+    prob_high_scores = (
+            probs_for_rank.get("17")
+            + probs_for_rank.get("18")
+            + probs_for_rank.get("19")
+            + probs_for_rank.get("20")
+            + probs_for_rank.get("21")
+    )
+    print("probBust" + str(prob_bust))
+    print("prob_high_scores" + str(prob_high_scores))
+    stand_hard[idx_j][idx_i] = prob_bust - prob_high_scores
