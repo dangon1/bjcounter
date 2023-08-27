@@ -2,11 +2,8 @@ import pandas as pd
 from fastapi import HTTPException
 
 from app.calculators import deck_calc
+from app.calculators.deck_calc import get_idx_from_sum_total_hard, recalculate_for_peak_rule, get_idx_from_idx_hard
 from app.constants.constants import UNITY_NORMALIZED_RANK, PEAKS_FOR_BJ
-
-HARD_TOTALS_MATRIX_OFFSET = 2
-SOFT_TOTALS_MATRIX_OFFSET = 12
-
 
 class CurComp:
     def __init__(self, cur_deck):
@@ -70,8 +67,8 @@ class CurComp:
         # pd.set_option('display.max_rows', None)
         # pd.set_option('display.max_columns', None)
         dealer_hard = {
-            "Outcome": list(range(2, 32)),
-            "Bust": [0] * 15 + [0] + [0] + [0] + [0] + [0] + [1] * 10,
+            "Outcome": [float(i) for i in range(2, 32)],
+            "Bust": [0.0] * 15 + [0] + [0] + [0] + [0] + [0] + [1] * 10,
             "17": [0] * 15 + [1] + [0] + [0] + [0] + [0] + [0] * 10,
             "18": [0] * 15 + [0] + [1] + [0] + [0] + [0] + [0] * 10,
             "19": [0] * 15 + [0] + [0] + [1] + [0] + [0] + [0] * 10,
@@ -82,7 +79,7 @@ class CurComp:
         df_t_hard = pd.DataFrame(dealer_hard).T
 
         dealer_soft = {
-            "Outcome": list(range(12, 32)),
+            "Outcome": [float(i) for i in range(12, 32)],
             "Bust": [0] * 5 + [0] + [0] + [0] + [0] + [0] + [0] * 5 + [0] + [0] + [0] + [0] + [0],
             "17": [0] * 5 + [1] + [0] + [0] + [0] + [0] + [0] * 5 + [1] + [0] + [0] + [0] + [0],
             "18": [0] * 5 + [0] + [1] + [0] + [0] + [0] + [0] * 5 + [0] + [1] + [0] + [0] + [0],
@@ -119,25 +116,7 @@ class CurComp:
         # df_t_hard.to_csv('df_t_hard.csv', index=False)
         # df_t_soft.to_csv('df_t_soft.csv', index=False)
 
-        return df_t_hard
-
-
-def recalculate_for_peak_rule(df_t_hard, df_t_soft, column_total, i):
-    if column_total == 10:
-        idx_sum_20 = get_idx_from_sum_total_hard(20)
-        line_new_value = 0
-        for j in range(get_idx_from_sum_total_hard(12), idx_sum_20):
-            line_new_value += df_t_hard[j][i]
-
-        line_new_value += (4 * df_t_hard[idx_sum_20][i])
-        return line_new_value / 12
-    if column_total == 11:
-        line_new_value = 0
-        for j in range(get_idx_from_sum_total_soft(12), get_idx_from_sum_total_soft(20) + 1):
-            line_new_value += df_t_soft[j][i]
-            print(df_t_soft[j][i])
-        print("Line value:" + str((line_new_value / 9)) + "Value to replace:" + str(df_t_soft[column_total - 2][i]), "Column total:" + str(column_total))
-        return line_new_value / 9
+        return df_t_hard, df_t_soft
 
     def get_stand_probs(self, dealer_cards):
         stand_hard = {
@@ -202,7 +181,7 @@ def recalculate_for_peak_rule(df_t_hard, df_t_soft, column_total, i):
     def calc_all_probs_dealer(self, sum_dealer_cards):
         if sum_dealer_cards < 2:
             raise HTTPException(status_code=400, detail=f"Dealer hasn't been dealt any cards.")
-        dealer_probs = self.get_dealer_probs()
+        dealer_probs = self.get_dealer_probs()[0]
         prob_bust = dealer_probs.iloc[1, int(sum_dealer_cards - 2)]
         prob_17 = dealer_probs.iloc[2, int(sum_dealer_cards - 2)]
         prob_18 = dealer_probs.iloc[3, int(sum_dealer_cards - 2)]
@@ -227,14 +206,3 @@ def get_prob_stand_until_16(probs_for_rank, stand_hard, idx_j, idx_i):
     # print("probBust" + str(prob_bust))
     # print("prob_high_scores" + str(prob_high_scores))
     stand_hard[idx_j][idx_i] = prob_bust - prob_high_scores
-
-
-def get_idx_from_idx_hard(sum1):
-    return sum1 + HARD_TOTALS_MATRIX_OFFSET
-
-
-def get_idx_from_sum_total_hard(sum1):
-    return sum1 - HARD_TOTALS_MATRIX_OFFSET
-
-def get_idx_from_sum_total_soft(sum1):
-    return sum1 - SOFT_TOTALS_MATRIX_OFFSET

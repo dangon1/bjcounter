@@ -3,7 +3,8 @@ from typing import List
 
 ACE_VALUE_11 = 11
 ACE_VALUE_1 = 1
-
+HARD_TOTALS_MATRIX_OFFSET = 2
+SOFT_TOTALS_MATRIX_OFFSET = 12
 
 class Card:
     def __init__(self, rank: str, suit: str):
@@ -79,3 +80,31 @@ def calc_sum_hand_ace_(cards, ace_value):
         rank_value = calc_card_value(card, ace_value)
         sum_cards += rank_value
     return sum_cards
+
+def recalculate_for_peak_rule(df_t_hard, df_t_soft, column_total, i):
+    if column_total == 10:
+        idx_sum_20 = get_idx_from_sum_total_hard(20)
+        line_new_value = 0
+        for j in range(get_idx_from_sum_total_hard(12), idx_sum_20):
+            line_new_value += df_t_hard[j][i]
+
+        line_new_value += (4 * df_t_hard[idx_sum_20][i])
+        return line_new_value / 12
+    if column_total == 11:
+        line_new_value = 0
+        for j in range(get_idx_from_sum_total_soft(12), get_idx_from_sum_total_soft(20) + 1):
+            line_new_value += df_t_soft[j][i]
+            print(df_t_soft[j][i])
+        print("Line value:" + str((line_new_value / 9)) + "Value to replace:" + str(df_t_soft[column_total - 2][i]), "Column total:" + str(column_total))
+        return line_new_value / 9
+
+
+def get_idx_from_idx_hard(sum1):
+    return sum1 + HARD_TOTALS_MATRIX_OFFSET
+
+
+def get_idx_from_sum_total_hard(sum1):
+    return sum1 - HARD_TOTALS_MATRIX_OFFSET
+
+def get_idx_from_sum_total_soft(sum1):
+    return sum1 - SOFT_TOTALS_MATRIX_OFFSET
