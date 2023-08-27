@@ -4,6 +4,9 @@ from fastapi import HTTPException
 from app.calculators import deck_calc
 from app.constants.constants import UNITY_NORMALIZED_RANK, PEAKS_FOR_BJ
 
+HARD_TOTALS_MATRIX_OFFSET = 2
+SOFT_TOTALS_MATRIX_OFFSET = 12
+
 
 class CurComp:
     def __init__(self, cur_deck):
@@ -60,7 +63,7 @@ class CurComp:
 
     def show_matrixes(self, dealer_cards):
         self.get_dealer_probs()
-        self.get_stand_probs(dealer_cards)
+        # self.get_stand_probs(dealer_cards)
 
     def get_dealer_probs(self):
         # Set display options to show all rows and columns
@@ -91,17 +94,22 @@ class CurComp:
         # Therefore df_transposed[3][5] is column 3, line 5
         df_t_soft = pd.DataFrame(dealer_soft).T
 
-        for j in range(14, -1, -1):
+        for j in range(get_idx_from_sum_total_hard(16), -1, -1):
             for i in range(1, 7):
                 hard_total = self.get_prob_hard_total(df_t_hard, df_t_soft, j, i)
-                if PEAKS_FOR_BJ:
-                    # FIX to use american peaking rule on dealer for 10s and Aces
-                    print("hey")
                 df_t_hard.iloc[(i, j)] = hard_total
                 if j >= 10:
                     df_t_soft.iloc[(i, j)] = hard_total
                 if j <= 4:
                     df_t_soft.iloc[(i, j)] = self.get_prob_soft_total(df_t_soft, j, i)
+
+        if PEAKS_FOR_BJ:
+            # American peaking rule on dealer for 10s and Aces
+            for j in range(get_idx_from_sum_total_hard(11), get_idx_from_sum_total_hard(9), -1):
+                for i in range(1, 7):
+                    hard_total = recalculate_for_peak_rule(df_t_hard, df_t_soft, get_idx_from_idx_hard(j), i)
+                    df_t_hard.iloc[(i, j)] = hard_total
+
         print("HARD")
         print(df_t_hard)
         print("SOFT")
@@ -111,8 +119,25 @@ class CurComp:
         # df_t_hard.to_csv('df_t_hard.csv', index=False)
         # df_t_soft.to_csv('df_t_soft.csv', index=False)
 
-
         return df_t_hard
+
+
+def recalculate_for_peak_rule(df_t_hard, df_t_soft, column_total, i):
+    if column_total == 10:
+        idx_sum_20 = get_idx_from_sum_total_hard(20)
+        line_new_value = 0
+        for j in range(get_idx_from_sum_total_hard(12), idx_sum_20):
+            line_new_value += df_t_hard[j][i]
+
+        line_new_value += (4 * df_t_hard[idx_sum_20][i])
+        return line_new_value / 12
+    if column_total == 11:
+        line_new_value = 0
+        for j in range(get_idx_from_sum_total_soft(12), get_idx_from_sum_total_soft(20) + 1):
+            line_new_value += df_t_soft[j][i]
+            print(df_t_soft[j][i])
+        print("Line value:" + str((line_new_value / 9)) + "Value to replace:" + str(df_t_soft[column_total - 2][i]), "Column total:" + str(column_total))
+        return line_new_value / 9
 
     def get_stand_probs(self, dealer_cards):
         stand_hard = {
@@ -149,7 +174,7 @@ class CurComp:
         stand_hard = pd.DataFrame(stand_hard).T
 
         for j in range(0, 10, 1):
-            probs_for_rank = self.calc_all_probs_dealer(j+2)
+            probs_for_rank = self.calc_all_probs_dealer(j + 2)
             for i in range(1, 16 - 3):
                 get_prob_stand_until_16(probs_for_rank, stand_hard, j, i)
 
@@ -186,6 +211,7 @@ class CurComp:
         prob_21 = dealer_probs.iloc[6, int(sum_dealer_cards - 2)]
         return {"bust": prob_bust, "17": prob_17, "18": prob_18, "19": prob_19, "20": prob_20, "21": prob_21}
 
+
 def get_prob_stand_until_16(probs_for_rank, stand_hard, idx_j, idx_i):
     # Get the probability of the dealer going Bust
     prob_bust = probs_for_rank.get("bust")
@@ -198,6 +224,17 @@ def get_prob_stand_until_16(probs_for_rank, stand_hard, idx_j, idx_i):
             + probs_for_rank.get("20")
             + probs_for_rank.get("21")
     )
-    print("probBust" + str(prob_bust))
-    print("prob_high_scores" + str(prob_high_scores))
+    # print("probBust" + str(prob_bust))
+    # print("prob_high_scores" + str(prob_high_scores))
     stand_hard[idx_j][idx_i] = prob_bust - prob_high_scores
+
+
+def get_idx_from_idx_hard(sum1):
+    return sum1 + HARD_TOTALS_MATRIX_OFFSET
+
+
+def get_idx_from_sum_total_hard(sum1):
+    return sum1 - HARD_TOTALS_MATRIX_OFFSET
+
+def get_idx_from_sum_total_soft(sum1):
+    return sum1 - SOFT_TOTALS_MATRIX_OFFSET
