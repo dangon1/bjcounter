@@ -2,7 +2,9 @@ import pandas as pd
 from fastapi import HTTPException
 
 from app.calculators import deck_calc
-from app.calculators.deck_calc import get_idx_from_sum_total_hard, recalculate_for_peak_rule, get_idx_from_idx_hard
+from app.calculators.deck_calc import get_idx_from_sum_total_hard, recalculate_for_peak_rule, get_idx_from_idx_hard, \
+    get_prob_stand_until_16, get_idx_from_sum_stand_hard, get_prob_stand_for_17, get_prob_stand_for_18, \
+    get_prob_stand_for_19, get_prob_stand_for_20, get_prob_stand_for_21, get_prob_stand
 from app.constants.constants import UNITY_NORMALIZED_RANK, PEAKS_FOR_BJ
 
 class CurComp:
@@ -60,7 +62,7 @@ class CurComp:
 
     def show_matrixes(self, dealer_cards):
         self.get_dealer_probs()
-        # self.get_stand_probs(dealer_cards)
+        self.get_stand_probs()
 
     def get_dealer_probs(self):
         # Set display options to show all rows and columns
@@ -112,13 +114,9 @@ class CurComp:
         print("SOFT")
         print(df_t_soft)
 
-        # Save the DataFrames to CSV files
-        # df_t_hard.to_csv('df_t_hard.csv', index=False)
-        # df_t_soft.to_csv('df_t_soft.csv', index=False)
-
         return df_t_hard, df_t_soft
 
-    def get_stand_probs(self, dealer_cards):
+    def get_stand_probs(self):
         stand_hard = {
             "Hard": list(range(2, 11)) + ["Ace"],
             "4": [0] * 10,
@@ -127,6 +125,7 @@ class CurComp:
             "7": [0] * 10,
             "8": [0] * 10,
             "9": [0] * 10,
+            "10": [0] * 10,
             "11": [0] * 10,
             "12": [0] * 10,
             "13": [0] * 10,
@@ -152,13 +151,22 @@ class CurComp:
 
         stand_hard = pd.DataFrame(stand_hard).T
 
-        for j in range(0, 10, 1):
-            probs_for_rank = self.calc_all_probs_dealer(j + 2)
-            for i in range(1, 16 - 3):
+        # Fill from row 4 through 16
+        all_probs_dealer = self.get_dealer_probs()[0]
+        for j in range(0, 10):
+            probs_for_rank = self.get_prob_per_rank(all_probs_dealer, j)
+            for i in range(1, get_idx_from_sum_total_hard(16)):
                 get_prob_stand_until_16(probs_for_rank, stand_hard, j, i)
+
+        # Fill for row 17 through 21
+        for j in range(0, 10):
+            probs_for_rank = self.get_prob_per_rank(all_probs_dealer, j)
+            for i in range(17, 22):
+                get_prob_stand(probs_for_rank, stand_hard, j, get_idx_from_sum_stand_hard(i) + 1, i)
 
         print("STAND_HARD")
         print(stand_hard)
+        return stand_hard
 
     # method not used anywhere yet
     def calc_prob_dealer_bust_next_card(self, dealer_cards):
@@ -178,31 +186,12 @@ class CurComp:
                 print("prob of i:  " + str(prob_busting))
             return prob_busting / 13
 
-    def calc_all_probs_dealer(self, sum_dealer_cards):
-        if sum_dealer_cards < 2:
-            raise HTTPException(status_code=400, detail=f"Dealer hasn't been dealt any cards.")
-        dealer_probs = self.get_dealer_probs()[0]
-        prob_bust = dealer_probs.iloc[1, int(sum_dealer_cards - 2)]
-        prob_17 = dealer_probs.iloc[2, int(sum_dealer_cards - 2)]
-        prob_18 = dealer_probs.iloc[3, int(sum_dealer_cards - 2)]
-        prob_19 = dealer_probs.iloc[4, int(sum_dealer_cards - 2)]
-        prob_20 = dealer_probs.iloc[5, int(sum_dealer_cards - 2)]
-        prob_21 = dealer_probs.iloc[6, int(sum_dealer_cards - 2)]
+
+    def get_prob_per_rank(self, dealer_probs, idx_sum_dealer):
+        prob_bust = dealer_probs.iloc[1, idx_sum_dealer]
+        prob_17 = dealer_probs.iloc[2, idx_sum_dealer]
+        prob_18 = dealer_probs.iloc[3, idx_sum_dealer]
+        prob_19 = dealer_probs.iloc[4, idx_sum_dealer]
+        prob_20 = dealer_probs.iloc[5, idx_sum_dealer]
+        prob_21 = dealer_probs.iloc[6, idx_sum_dealer]
         return {"bust": prob_bust, "17": prob_17, "18": prob_18, "19": prob_19, "20": prob_20, "21": prob_21}
-
-
-def get_prob_stand_until_16(probs_for_rank, stand_hard, idx_j, idx_i):
-    # Get the probability of the dealer going Bust
-    prob_bust = probs_for_rank.get("bust")
-
-    # Get the sum of probabilities for dealer scores 17 through 21
-    prob_high_scores = (
-            probs_for_rank.get("17")
-            + probs_for_rank.get("18")
-            + probs_for_rank.get("19")
-            + probs_for_rank.get("20")
-            + probs_for_rank.get("21")
-    )
-    # print("probBust" + str(prob_bust))
-    # print("prob_high_scores" + str(prob_high_scores))
-    stand_hard[idx_j][idx_i] = prob_bust - prob_high_scores

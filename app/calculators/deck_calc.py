@@ -5,6 +5,7 @@ ACE_VALUE_11 = 11
 ACE_VALUE_1 = 1
 HARD_TOTALS_MATRIX_OFFSET = 2
 SOFT_TOTALS_MATRIX_OFFSET = 12
+HARD_TOTALS_MATRIX_STAND_OFFSET = 4
 
 class Card:
     def __init__(self, rank: str, suit: str):
@@ -94,17 +95,97 @@ def recalculate_for_peak_rule(df_t_hard, df_t_soft, column_total, i):
         line_new_value = 0
         for j in range(get_idx_from_sum_total_soft(12), get_idx_from_sum_total_soft(20) + 1):
             line_new_value += df_t_soft[j][i]
-            print(df_t_soft[j][i])
-        print("Line value:" + str((line_new_value / 9)) + "Value to replace:" + str(df_t_soft[column_total - 2][i]), "Column total:" + str(column_total))
         return line_new_value / 9
 
 
 def get_idx_from_idx_hard(sum1):
     return sum1 + HARD_TOTALS_MATRIX_OFFSET
 
-
 def get_idx_from_sum_total_hard(sum1):
     return sum1 - HARD_TOTALS_MATRIX_OFFSET
 
 def get_idx_from_sum_total_soft(sum1):
     return sum1 - SOFT_TOTALS_MATRIX_OFFSET
+
+def get_idx_from_sum_stand_hard(sum1):
+    return sum1 - HARD_TOTALS_MATRIX_STAND_OFFSET
+
+def get_prob_stand_until_16(probs_for_rank, stand_hard, idx_j, idx_i):
+    # Get the probability of the dealer losing
+    prob_player_win = probs_for_rank.get("bust")
+
+    prob_player_lose = (
+            probs_for_rank.get("17")
+            + probs_for_rank.get("18")
+            + probs_for_rank.get("19")
+            + probs_for_rank.get("20")
+            + probs_for_rank.get("21")
+    )
+
+    # print("probBust" + str(prob_player_win))
+    # print("prob_against" + str(prob_against))
+    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
+
+def get_prob_stand_for_17(probs_for_rank, stand_hard, idx_j, idx_i):
+    # Get the probability of the dealer losing
+    prob_player_win = probs_for_rank.get("bust")
+
+    prob_player_lose = (
+            + probs_for_rank.get("18")
+            + probs_for_rank.get("19")
+            + probs_for_rank.get("20")
+            + probs_for_rank.get("21")
+    )
+    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
+
+def get_prob_stand_for_18(probs_for_rank, stand_hard, idx_j, idx_i):
+    # Get the probability of the dealer losing
+    prob_player_win = probs_for_rank.get("bust") + probs_for_rank.get("17")
+
+    prob_player_lose = (
+            + probs_for_rank.get("19")
+            + probs_for_rank.get("20")
+            + probs_for_rank.get("21")
+    )
+    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
+
+def get_prob_stand_for_19(probs_for_rank, stand_hard, idx_j, idx_i):
+    # Get the probability of the dealer losing
+    prob_player_win = probs_for_rank.get("bust") + probs_for_rank.get("17") + probs_for_rank.get("18")
+
+    prob_player_lose = (
+            + probs_for_rank.get("20")
+            + probs_for_rank.get("21")
+    )
+    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
+
+def get_prob_stand_for_20(probs_for_rank, stand_hard, idx_j, idx_i):
+    # Get the probability of the dealer losing
+    prob_player_win = probs_for_rank.get("bust") \
+                      + probs_for_rank.get("17") \
+                      + probs_for_rank.get("18") \
+                      + probs_for_rank.get("19")
+
+    prob_player_lose = probs_for_rank.get("21")
+    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
+
+def get_prob_stand_for_21(probs_for_rank, stand_hard, idx_j, idx_i):
+    # Get the probability of the dealer losing
+    prob_player_win = probs_for_rank.get("bust") \
+                      + probs_for_rank.get("17") \
+                      + probs_for_rank.get("18") \
+                      + probs_for_rank.get("19") \
+                      + probs_for_rank.get("20")
+    # 21 is a push
+    stand_hard[idx_j][idx_i] = prob_player_win
+
+def get_prob_stand(probs_for_rank, stand_hard, idx_j, idx_i, player_rank):
+    # Get the probability of the dealer losing
+    prob_player_win = (
+            probs_for_rank.get("bust")
+            + sum(probs_for_rank.get(str(rank)) for rank in range(17, player_rank + 1))
+    )
+
+    prob_player_lose = sum(probs_for_rank.get(str(rank)) for rank in range(player_rank, 22))
+
+    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
