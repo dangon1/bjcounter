@@ -24,7 +24,7 @@ async def startup_event():
 @app.get("/admin/show_matrixes")
 async def show_matrixes():
      global cur_comp
-     return admin.show_matrixes(cur_comp, dealer_cards)
+     return admin.show_matrixes(cur_comp)
 
 @app.get("/admin/prob_bust")
 async def prob_bust():

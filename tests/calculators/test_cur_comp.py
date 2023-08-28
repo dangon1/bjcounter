@@ -33,16 +33,22 @@ class TestCurComp(unittest.TestCase):
     def test_get_stand_probs(self):
         global CurComp
         cur_comp = CurComp(deck_calc.build_deck(NUMBER_OF_DECKS))
-        stand_hard = CurComp.get_stand_probs(cur_comp)
+        stand_hard, stand_soft = CurComp.get_stand_probs(cur_comp)
 
         for j in range(0, 10):
             for i in range(1, 26):
                 stand_hard.iloc[(i, j)] = round(stand_hard.iloc[(i, j)], 10)
 
+        for j in range(0, 10):
+            for i in range(1, 21):
+                stand_soft.iloc[(i, j)] = round(stand_soft.iloc[(i, j)], 10)
+
         # Save the DataFrames to CSV files
         stand_hard.to_csv('stand_hard.csv', index=False)
+        stand_soft.to_csv('stand_soft.csv', index=False)
 
         self.assert_csv_files_equal('stand_hard.csv', 'expected_hard_stand.csv')
+        self.assert_csv_files_equal('stand_soft.csv', 'expected_soft_stand.csv')
 
     def assert_csv_files_equal(self, expected_filename, actual_filename):
         # round_csv(expected_filename, 'expected_df_t_hard_2', 10)

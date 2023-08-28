@@ -126,60 +126,7 @@ def get_prob_stand_until_16(probs_for_rank, stand_hard, idx_j, idx_i):
     # print("prob_against" + str(prob_against))
     stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
 
-def get_prob_stand_for_17(probs_for_rank, stand_hard, idx_j, idx_i):
-    # Get the probability of the dealer losing
-    prob_player_win = probs_for_rank.get("bust")
-
-    prob_player_lose = (
-            + probs_for_rank.get("18")
-            + probs_for_rank.get("19")
-            + probs_for_rank.get("20")
-            + probs_for_rank.get("21")
-    )
-    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
-
-def get_prob_stand_for_18(probs_for_rank, stand_hard, idx_j, idx_i):
-    # Get the probability of the dealer losing
-    prob_player_win = probs_for_rank.get("bust") + probs_for_rank.get("17")
-
-    prob_player_lose = (
-            + probs_for_rank.get("19")
-            + probs_for_rank.get("20")
-            + probs_for_rank.get("21")
-    )
-    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
-
-def get_prob_stand_for_19(probs_for_rank, stand_hard, idx_j, idx_i):
-    # Get the probability of the dealer losing
-    prob_player_win = probs_for_rank.get("bust") + probs_for_rank.get("17") + probs_for_rank.get("18")
-
-    prob_player_lose = (
-            + probs_for_rank.get("20")
-            + probs_for_rank.get("21")
-    )
-    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
-
-def get_prob_stand_for_20(probs_for_rank, stand_hard, idx_j, idx_i):
-    # Get the probability of the dealer losing
-    prob_player_win = probs_for_rank.get("bust") \
-                      + probs_for_rank.get("17") \
-                      + probs_for_rank.get("18") \
-                      + probs_for_rank.get("19")
-
-    prob_player_lose = probs_for_rank.get("21")
-    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
-
-def get_prob_stand_for_21(probs_for_rank, stand_hard, idx_j, idx_i):
-    # Get the probability of the dealer losing
-    prob_player_win = probs_for_rank.get("bust") \
-                      + probs_for_rank.get("17") \
-                      + probs_for_rank.get("18") \
-                      + probs_for_rank.get("19") \
-                      + probs_for_rank.get("20")
-    # 21 is a push
-    stand_hard[idx_j][idx_i] = prob_player_win
-
-def get_prob_stand(probs_for_rank, stand_hard, idx_j, idx_i, player_rank):
+def get_prob_stand(probs_for_rank, player_rank):
     # Get the probability of the dealer losing
     prob_player_win = (
             probs_for_rank.get("bust")
@@ -188,4 +135,4 @@ def get_prob_stand(probs_for_rank, stand_hard, idx_j, idx_i, player_rank):
 
     prob_player_lose = sum(probs_for_rank.get(str(rank)) for rank in range(player_rank, 22))
 
-    stand_hard[idx_j][idx_i] = prob_player_win - prob_player_lose
+    return prob_player_win - prob_player_lose

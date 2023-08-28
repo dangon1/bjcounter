@@ -3,8 +3,7 @@ from fastapi import HTTPException
 
 from app.calculators import deck_calc
 from app.calculators.deck_calc import get_idx_from_sum_total_hard, recalculate_for_peak_rule, get_idx_from_idx_hard, \
-    get_prob_stand_until_16, get_idx_from_sum_stand_hard, get_prob_stand_for_17, get_prob_stand_for_18, \
-    get_prob_stand_for_19, get_prob_stand_for_20, get_prob_stand_for_21, get_prob_stand
+    get_prob_stand_until_16, get_idx_from_sum_stand_hard, get_prob_stand
 from app.constants.constants import UNITY_NORMALIZED_RANK, PEAKS_FOR_BJ
 
 class CurComp:
@@ -60,7 +59,7 @@ class CurComp:
 
         return result / 13
 
-    def show_matrixes(self, dealer_cards):
+    def show_matrixes(self):
         self.get_dealer_probs()
         self.get_stand_probs()
 
@@ -162,11 +161,39 @@ class CurComp:
         for j in range(0, 10):
             probs_for_rank = self.get_prob_per_rank(all_probs_dealer, j)
             for i in range(17, 22):
-                get_prob_stand(probs_for_rank, stand_hard, j, get_idx_from_sum_stand_hard(i) + 1, i)
+                stand_hard[j][get_idx_from_sum_stand_hard(i) + 1] = get_prob_stand(probs_for_rank, i)
+
+        stand_soft = {
+            "Soft": list(range(2, 11)) + ["Ace"],
+            "12": stand_hard.iloc[9],
+            "13": stand_hard.iloc[10],
+            "14": stand_hard.iloc[11],
+            "15": stand_hard.iloc[12],
+            "16": stand_hard.iloc[13],
+            "17": stand_hard.iloc[14],
+            "18": stand_hard.iloc[15],
+            "19": stand_hard.iloc[16],
+            "20": stand_hard.iloc[17],
+            "21": stand_hard.iloc[18],
+            "22": stand_hard.iloc[9],
+            "23": stand_hard.iloc[10],
+            "24": stand_hard.iloc[11],
+            "25": stand_hard.iloc[12],
+            "26": stand_hard.iloc[13],
+            "27": stand_hard.iloc[14],
+            "28": stand_hard.iloc[15],
+            "29": stand_hard.iloc[16],
+            "30": stand_hard.iloc[17],
+            "31": stand_hard.iloc[18]
+        }
+
+        stand_soft = pd.DataFrame(stand_soft).T
 
         print("STAND_HARD")
         print(stand_hard)
-        return stand_hard
+        print("STAND_SOFT")
+        print(stand_soft)
+        return stand_hard, stand_soft
 
     # method not used anywhere yet
     def calc_prob_dealer_bust_next_card(self, dealer_cards):
