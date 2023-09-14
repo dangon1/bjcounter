@@ -8,6 +8,7 @@
 
 # Virtual env
 /bjvenv
+/winbjvenv
 
 # Python
 */__pycache__

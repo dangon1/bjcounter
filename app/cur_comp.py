@@ -1,10 +1,10 @@
 import pandas as pd
-from fastapi import HTTPException
 
 from app.calculators import deck_calc
 from app.calculators.deck_calc import get_idx_from_sum_total_hard, recalculate_for_peak_rule, get_idx_from_idx_hard, \
-    get_prob_stand_until_16, get_idx_from_sum_stand_hard, get_prob_stand
+    get_prob_stand_until_16, idx_from_hard_shd, get_prob_stand
 from app.constants.constants import UNITY_NORMALIZED_RANK, PEAKS_FOR_BJ
+
 
 class CurComp:
     def __init__(self, cur_deck):
@@ -43,10 +43,27 @@ class CurComp:
             if rank in ["2", "3", "4", "5", "6", "7", "8", "9", "T"]:
                 result += normalized_prob_rank * df_t_hard[idx_column_hard_total + ranks.index(rank) + 2][
                     idx_row_hard_total]
+                print(str(result) + " i:" + str(idx_row_hard_total) + " j:" + str(idx_column_hard_total))
             elif rank == "A":
                 result += normalized_prob_rank * df_t_soft[idx_column_hard_total + 1][idx_row_hard_total]
 
         return result / 13
+
+    def get_prob_hard_total_hit(self, df_t_hard, df_t_soft, x):
+        ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "A"]
+        result = 0
+
+        for rank in ranks:
+            for i in range(ranks.index(rank) + 1 + x, 10 + ranks.index(rank) + x):
+                normalized_prob_rank = self.get_normalized_prob_rank(rank)
+                prob_each = normalized_prob_rank * df_t_hard[ranks.index(rank)][i]
+                print(str(prob_each) + " i:" + str(i) + " j:" + str(ranks.index(rank)))
+                result += prob_each
+            
+            prob_ace = df_t_soft[ranks.index(rank)][x+4]
+            print("prob ace:" +str(prob_ace) + " i:" + str(i) + " j:" + str(ranks.index(rank)))
+            result += prob_ace
+        return result
 
     def get_prob_soft_total(self, df_t_soft, idx_column_soft_total, idx_row_soft_total):
         ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T"]
@@ -62,6 +79,7 @@ class CurComp:
     def show_matrixes(self):
         self.get_dealer_probs()
         self.get_stand_probs()
+        self.get_hit_probs()
 
     def get_dealer_probs(self):
         # Set display options to show all rows and columns
@@ -161,7 +179,7 @@ class CurComp:
         for j in range(0, 10):
             probs_for_rank = self.get_prob_per_rank(all_probs_dealer, j)
             for i in range(17, 22):
-                stand_hard[j][get_idx_from_sum_stand_hard(i) + 1] = get_prob_stand(probs_for_rank, i)
+                stand_hard[j][idx_from_hard_shd(i) + 1] = get_prob_stand(probs_for_rank, i)
 
         stand_soft = {
             "Soft": list(range(2, 11)) + ["Ace"],
@@ -195,6 +213,30 @@ class CurComp:
         print(stand_soft)
         return stand_hard, stand_soft
 
+    def get_hit_probs(self):
+        stand_hard, stand_soft = self.get_stand_probs()
+        hit_hard, hit_soft = stand_hard, stand_soft
+        hs_hard, hs_soft = hit_hard, hit_soft
+
+        for j in range(0, 10):
+            for i in range(1, idx_from_hard_shd(31)):
+                hs_hard[j][idx_from_hard_shd(i) + 1] = max(stand_hard[j][idx_from_hard_shd(i) + 1],
+                                                           hit_hard[j][idx_from_hard_shd(i) + 1])
+                if i < 21:
+                    hs_soft[j][idx_from_hard_shd(i) + 1] = max(stand_soft[j][idx_from_hard_shd(i) + 1],
+                                                               hit_soft[j][idx_from_hard_shd(i) + 1])
+
+        print("HS_HARD")
+        print(hs_hard)
+        
+        print("HS_SOFT")
+        print(hs_soft)
+        for x in range(0, 17):
+            hard_total = self.get_prob_hard_total_hit(hs_hard, hs_soft, x)
+
+        print("HIT_HARD")
+        print(hit_hard)
+
     # method not used anywhere yet
     def calc_prob_dealer_bust_next_card(self, dealer_cards):
         sum_dealer_cards = deck_calc.calc_sum_hand(dealer_cards)
@@ -212,7 +254,6 @@ class CurComp:
                 prob_busting += self.get_normalized_prob_rank(str(i))
                 print("prob of i:  " + str(prob_busting))
             return prob_busting / 13
-
 
     def get_prob_per_rank(self, dealer_probs, idx_sum_dealer):
         prob_bust = dealer_probs.iloc[1, idx_sum_dealer]

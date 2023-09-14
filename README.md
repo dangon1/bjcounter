@@ -15,6 +15,16 @@ Make sure to activate your `venv` before making changes
 source bjvenv/bin/activate
 ```
 
+### Create a virtual environment and activate it (WINDOWS):
+From project root run
+```$bash
+python -m venv winbjvenv
+```
+Make sure to activate your `venv` before making changes
+```$bash
+.\winbjvenv\Scripts\Activate
+```
+
 ### Install the requirements
 pip3 install -r requirements.txt
 
@@ -38,6 +48,9 @@ pip3 install <dependency_name>
 pip3 freeze > requirements.txt
 
 ```
+
+### Running unit tests
+From inside tests/calculators run: ```python -m unittest <path_to_test_file>``` eg: ```python -m unittest test_cur_comp.py```
 
 ### Verify if pytest is on your path
 if using zsh, check if on ~/.zshrc there is the line:

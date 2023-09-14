@@ -107,7 +107,7 @@ def get_idx_from_sum_total_hard(sum1):
 def get_idx_from_sum_total_soft(sum1):
     return sum1 - SOFT_TOTALS_MATRIX_OFFSET
 
-def get_idx_from_sum_stand_hard(sum1):
+def idx_from_hard_shd(sum1):
     return sum1 - HARD_TOTALS_MATRIX_STAND_OFFSET
 
 def get_prob_stand_until_16(probs_for_rank, stand_hard, idx_j, idx_i):
