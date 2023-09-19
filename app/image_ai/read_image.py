@@ -63,77 +63,80 @@ if not cards_images:
 
 else:
 
-    # # Define the region of interest (ROI) coordinates
-    # # SMALL SCREEN
-    # roi_x_player = 1250  # X-coordinate of the top-left corner of the ROI
-    # roi_y_player = 650  # Y-coordinate of the top-left corner of the ROI
-    # roi_width = 400  # Width of the ROI
-    # roi_height = 100  # Height of the ROI
-
-    # roi_x_dealer = 1100  # X-coordinate of the top-left corner of the ROI
-    # roi_y_dealer = 480  # Y-coordinate of the top-left corner of the ROI
-
-    # Define the region of interest (ROI) coordinates
-    # LARGE SCREEN
-    roi_x_player = 1750  # X-coordinate of the top-left corner of the ROI
-    roi_y_player = 900  # Y-coordinate of the top-left corner of the ROI
-    roi_width = 400  # Width of the ROI
-    roi_height = 50  # Height of the ROI
-
-    roi_x_dealer = 1450  # X-coordinate of the top-left corner of the ROI
-    roi_y_dealer = 650  # Y-coordinate of the top-left corner of the ROI
-
-    while True:
-        # Capture the screen
-        # screenshot = pyautogui.screenshot()
-        screenshot = pyautogui.screenshot(region=(roi_x_player, roi_y_player, roi_width, roi_height))
-        screenshot = np.array(screenshot)
-        screenshot_gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
-        
-        screenshot_dealer = pyautogui.screenshot(region=(roi_x_dealer, roi_y_dealer, roi_width, roi_height))
-        screenshot_dealer = np.array(screenshot_dealer)
-        screenshot_dealer_gray = cv2.cvtColor(screenshot_dealer, cv2.COLOR_BGR2GRAY)
+    if __name__ == '__main__':
        
-        # Iterate through each template and perform template matching
-        for card_gray, card_name in cards_images:
-            # cv2.imshow("Card to match", card_gray)
-            # cv2.waitKey(0)
+
+        # # Define the region of interest (ROI) coordinates
+        # # SMALL SCREEN
+        # roi_x_player = 1250  # X-coordinate of the top-left corner of the ROI
+        # roi_y_player = 650  # Y-coordinate of the top-left corner of the ROI
+        # roi_width = 400  # Width of the ROI
+        # roi_height = 100  # Height of the ROI
+
+        # roi_x_dealer = 1100  # X-coordinate of the top-left corner of the ROI
+        # roi_y_dealer = 480  # Y-coordinate of the top-left corner of the ROI
+
+        # Define the region of interest (ROI) coordinates
+        # LARGE SCREEN
+        roi_x_player = 1750  # X-coordinate of the top-left corner of the ROI
+        roi_y_player = 900  # Y-coordinate of the top-left corner of the ROI
+        roi_width = 400  # Width of the ROI
+        roi_height = 50  # Height of the ROI
+
+        roi_x_dealer = 1450  # X-coordinate of the top-left corner of the ROI
+        roi_y_dealer = 650  # Y-coordinate of the top-left corner of the ROI
+
+        while True:
+            # Capture the screen
+            # screenshot = pyautogui.screenshot()
+            screenshot = pyautogui.screenshot(region=(roi_x_player, roi_y_player, roi_width, roi_height))
+            screenshot = np.array(screenshot)
+            screenshot_gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+        
+            screenshot_dealer = pyautogui.screenshot(region=(roi_x_dealer, roi_y_dealer, roi_width, roi_height))
+            screenshot_dealer = np.array(screenshot_dealer)
+            screenshot_dealer_gray = cv2.cvtColor(screenshot_dealer, cv2.COLOR_BGR2GRAY)
+       
+            # Iterate through each template and perform template matching
+            for card_gray, card_name in cards_images:
+                # cv2.imshow("Card to match", card_gray)
+                # cv2.waitKey(0)
             
-            # Checking player cards
-            found_card = search_card(screenshot_gray, card_gray)
-            add_card_if_not_exists(found_cards, found_card, True)
-            # if found_card != {} and found_card not in found_cards:
-            #     found_cards.append(found_card)
+                # Checking player cards
+                found_card = search_card(screenshot_gray, card_gray)
+                add_card_if_not_exists(found_cards, found_card, True)
+                # if found_card != {} and found_card not in found_cards:
+                #     found_cards.append(found_card)
 
-            # Checking dealer cards
-            found_card = search_card(screenshot_dealer_gray, card_gray)
-            add_card_if_not_exists(found_cards_dealer, found_card, False)
-            # if found_card != {} and found_card not in found_cards:
-            #     found_cards.update(found_card)
+                # Checking dealer cards
+                found_card = search_card(screenshot_dealer_gray, card_gray)
+                add_card_if_not_exists(found_cards_dealer, found_card, False)
+                # if found_card != {} and found_card not in found_cards:
+                #     found_cards.update(found_card)
 
-        if found_cards:
-            print("PLAYER:")
-            card_values = [{card_data["card"]} for card_data in found_cards]
-            print(card_values)
-        if found_cards_dealer:
-            print("DEALER:")
-            card_values = [{card_data["card"]} for card_data in found_cards_dealer]
-            print(card_values)
-        else:
-            print("No cards found on the screen.")
+            if found_cards:
+                print("PLAYER:")
+                card_values = [{card_data["card"]} for card_data in found_cards]
+                print(card_values)
+            if found_cards_dealer:
+                print("DEALER:")
+                card_values = [{card_data["card"]} for card_data in found_cards_dealer]
+                print(card_values)
+            else:
+                print("No cards found on the screen.")
 
-        # Display the captured screen with matches (optional)
-        # cv2.imshow("Screen", screenshot)
-
-
-        # Display the captured screen with matches
-        # cv2.imshow("Screen", screenshot)
-        # cv2.waitKey(0)  # Wait for a key press to close the window
+            # Display the captured screen with matches (optional)
+            # cv2.imshow("Screen", screenshot)
 
 
-        # Exit when 'q' key is pressed
-        if cv2.waitKey(1) == ord('q'):
-            print("quit")
-            break
+            # Display the captured screen with matches
+            # cv2.imshow("Screen", screenshot)
+            # cv2.waitKey(0)  # Wait for a key press to close the window
 
-    cv2.destroyAllWindows()
+
+            # Exit when 'q' key is pressed
+            if cv2.waitKey(1) == ord('q'):
+                print("quit")
+                break
+
+        cv2.destroyAllWindows()
