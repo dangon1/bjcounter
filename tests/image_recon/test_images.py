@@ -29,7 +29,7 @@ class CardDetectionTest(unittest.TestCase):
 
     def test_card_detection(self):
         # Provide a sample filename for the image to be tested
-        test_image_filename = os.path.join(os.getcwd(), 'app', 'image_ai', 'card_images_large_screen_h_small' , '3c.png')  # Replace with the actual path
+        test_image_filename = os.path.join(os.getcwd(), 'tests', 'image_recon',  '1.png')  # Replace with the actual path
 
         # Load the test image
         test_image = cv2.imread(test_image_filename, cv2.IMREAD_GRAYSCALE)
@@ -45,11 +45,11 @@ class CardDetectionTest(unittest.TestCase):
         for card_gray, card_name in self.cards_images:
             # Call the search_card function with the test image and template card image            
             
-            found_card_player = search_card(test_image, card_gray)
-            self.add_card_if_not_exists(found_cards, found_card_player, True)
+            found_card_player = search_card(test_image, card_gray,card_name)
+            add_card_if_not_exists(found_cards, found_card_player, True)
 
-            found_card_dealer = self.search_card(test_image, card_gray)
-            self.add_card_if_not_exists(found_cards_dealer, found_card_dealer, False)
+            found_card_dealer = search_card(test_image, card_gray,card_name)
+            add_card_if_not_exists(found_cards_dealer, found_card_dealer, False)
 
         # Perform your assertions here to validate the results
         # For example, you can assert that certain cards were found in the test image:

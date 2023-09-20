@@ -34,14 +34,14 @@ def print_no_cards_message():
         print(f"No valid card images found (Attempt {attempt_counter})")   
         last_message_is_not_found = True;
 
-def search_card(screenshot, card):
+def search_card(screenshot, card , card_name):
     # cv2.imshow("Captured Screenshot", screenshot)
     # cv2.waitKey(0)  # Wait for a key press to close the window
 
     # Checking dealer cards
     res = cv2.matchTemplate(screenshot, card, cv2.TM_CCOEFF_NORMED)
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
-    threshold = 0.97  # Adjust the threshold as needed
+    threshold = 0.97 # Adjust the threshold as needed
     card_name_pos = {}
     if max_val >= threshold:
         # print(f"Found card '{card_name}' at pixel coordinates (x={max_loc[0]}, y={max_loc[1]})")
@@ -115,13 +115,13 @@ else:
                 # cv2.waitKey(0)
             
                 # Checking player cards
-                found_card = search_card(screenshot_gray, card_gray)
+                found_card = search_card(screenshot_gray, card_gray , card_name)
                 add_card_if_not_exists(found_cards, found_card, True)
                 # if found_card != {} and found_card not in found_cards:
                 #     found_cards.append(found_card)
 
                 # Checking dealer cards
-                found_card = search_card(screenshot_dealer_gray, card_gray)
+                found_card = search_card(screenshot_dealer_gray, card_gray , card_name)
                 add_card_if_not_exists(found_cards_dealer, found_card, False)
                 # if found_card != {} and found_card not in found_cards:
                 #     found_cards.update(found_card)
