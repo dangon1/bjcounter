@@ -18,7 +18,7 @@ from app.image_ai import read_image;
 class CardDetectionTest(unittest.TestCase):
     def setUp(self):
         # Load the card images from your directory
-        cards_dir = os.path.abspath(os.path.join(os.getcwd(), 'app', 'image_ai', 'card_images_new_approach'))
+        cards_dir = os.path.abspath(os.path.join(parent_dir, 'app', 'image_ai', 'card_images_new_approach'))
         print(cards_dir);
         logging.info(cards_dir);
         self.cards_images = []
@@ -35,7 +35,7 @@ class CardDetectionTest(unittest.TestCase):
         return image[y:y+height, x:x+width]
     def test_card_detection(self):
         # Provide a sample filename for the image to be tested
-        test_image_filename = os.path.abspath(os.path.join(os.getcwd(), 'tests', 'image_recon',  '1.png'))  # Replace with the actual path
+        test_image_filename = os.path.abspath(os.path.join(parent_dir, 'tests', 'image_recon',  '1.png'))  # Replace with the actual path
        
         #load Definitions        
         roi_definitions = read_image.GetRoiDefinitions(read_image.roi_configurations[2])
