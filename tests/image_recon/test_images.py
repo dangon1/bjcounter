@@ -3,6 +3,7 @@ import cv2
 import os
 import numpy as np
 import sys
+import logging
 
 
 # Add the parent directory of 'bjcounter' to the sys.path
@@ -19,6 +20,7 @@ class CardDetectionTest(unittest.TestCase):
         # Load the card images from your directory
         cards_dir = os.path.abspath(os.path.join(os.getcwd(), 'app', 'image_ai', 'card_images_new_approach'))
         print(cards_dir);
+        logging.info(cards_dir);
         self.cards_images = []
         for filename in os.listdir(cards_dir):
             if filename.endswith(".png"):
@@ -33,7 +35,7 @@ class CardDetectionTest(unittest.TestCase):
         return image[y:y+height, x:x+width]
     def test_card_detection(self):
         # Provide a sample filename for the image to be tested
-        test_image_filename = os.path.abspath(os.path.join(os.getcwd()), 'tests', 'image_recon',  '1.png')  # Replace with the actual path
+        test_image_filename = os.path.abspath(os.path.join(os.getcwd(), 'tests', 'image_recon',  '1.png'))  # Replace with the actual path
        
         #load Definitions        
         roi_definitions = read_image.GetRoiDefinitions(read_image.roi_configurations[2])
