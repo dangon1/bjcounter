@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import pyautogui
+import curses
+import uuid
 
 # Load the template image
 import os
@@ -50,9 +52,11 @@ def search_card(screenshot, card , card_name):
         card_name_pos["card"] = card_name
         card_name_pos["pos_x"] = max_loc[0]
         card_name_pos["pos_y"] = max_loc[1]
+    #    print(f"Treshhold: {max_val} card: {card_name}" )
     #else:        
-    #    if (max_val >= 0.65):
-    #        print(f"Treshhold: {max_val} card: {card_name}" )
+    #    #if (max_val >= 0.70):
+    #    print(f"Treshhold: {max_val} card: {card_name}" )
+
         # loc = np.where(res >= threshold)
         # for pt in zip(*loc[::-1]):
         #     # Draw a rectangle around the matched area
@@ -74,6 +78,12 @@ def add_card_if_not_exists(found_cards, found_card, is_player):
         # if still not found is indeed a new card 
         if found_card not in found_cards:
             found_cards.append(found_card)
+
+def save_screenshots(screenshot):
+    # Generate unique filenames using UUID
+    screenshot_filename = f"screenshot_{uuid.uuid4()}.png"    
+
+    cv2.imwrite(screenshot_filename, screenshot)    
             
 # Define the region of interest (ROI) coordinates
 def GetRoiDefinitions(configuration):
@@ -97,12 +107,12 @@ def GetRoiDefinitions(configuration):
         }
     elif configuration == "ALTERNATIVE MONITOR": 
         return {
-            "roi_x_player": 956,
-            "roi_y_player": 747,
-            "roi_x_dealer": 937,
-            "roi_y_dealer": 580,
+            "roi_x_player": 960,
+            "roi_y_player": 778,
+            "roi_x_dealer": 943,
+            "roi_y_dealer": 603,
             "roi_width": 400,
-            "roi_height": 22
+            "roi_height": 50
         }
     else:
         raise ValueError("Invalid configuration type")
@@ -122,7 +132,7 @@ else:
         while True:
             # Capture the screen
             # screenshot = pyautogui.screenshot()            
-
+            
             screenshot = pyautogui.screenshot(region=(roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"]))
             screenshot = np.array(screenshot)
             screenshot_gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
@@ -164,15 +174,12 @@ else:
                 print_no_cards_message()
                 attempt_counter += 1
 
-            # Display the captured screen with matches (optional)            
-            #cv2.imshow("Screen", screenshot)
-
-
             # Display the captured screen with matches
-            #cv2.imshow("Screen", screenshot)
+            #cv2.imshow("Screen", screenshot)            
             #cv2.imshow("Screen2", screenshot_dealer)
             #cv2.waitKey(0)  # Wait for a key press to close the window            
-
+             
+            #save_screenshots(screenshot);                      
 
             # Exit when 'q' key is pressed
             if cv2.waitKey(1) == ord('q'):
