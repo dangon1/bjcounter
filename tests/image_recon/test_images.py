@@ -6,8 +6,8 @@ import sys
 
 
 # Add the parent directory of 'bjcounter' to the sys.path
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(parent_dir+"\\..\\")
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(parent_dir)
 
 # Now you can use relative imports as usual
 from app.image_ai import read_image; 
@@ -52,8 +52,8 @@ class CardDetectionTest(unittest.TestCase):
             # Convert the color image to grayscale
             grayscale_image = cv2.cvtColor(test_image, cv2.COLOR_BGR2GRAY)
     
-        print(grayscale_image)
-        read_image.save_screenshots(grayscale_image);
+        #print(grayscale_image)
+        #read_image.save_screenshots(grayscale_image);
 
         # Ensure that the test image has been loaded successfully        
 
