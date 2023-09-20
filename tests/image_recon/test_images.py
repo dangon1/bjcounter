@@ -7,6 +7,7 @@ import sys
 
 # Add the parent directory of 'bjcounter' to the sys.path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+print(parent_dir);
 sys.path.append(parent_dir)
 
 # Now you can use relative imports as usual
@@ -17,6 +18,7 @@ class CardDetectionTest(unittest.TestCase):
     def setUp(self):
         # Load the card images from your directory
         cards_dir = os.path.join(os.getcwd(), 'app', 'image_ai', 'card_images_new_approach')
+        print(cards_dir);
         self.cards_images = []
         for filename in os.listdir(cards_dir):
             if filename.endswith(".png"):
