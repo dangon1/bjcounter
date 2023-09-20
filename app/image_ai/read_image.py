@@ -11,6 +11,11 @@ cards_dir = os.path.join(os.getcwd(), 'app', 'image_ai', 'card_images_large_scre
 cards_images = []
 found_cards = []  # List to store matched cards
 found_cards_dealer = []  # List to store matched cards
+attempt_counter = 1
+last_message_is_not_found = False;
+
+# Initialize the attempt counter
+
 
 for filename in os.listdir(cards_dir):
     if filename.endswith(".png"):
@@ -21,6 +26,13 @@ for filename in os.listdir(cards_dir):
         else:
             print(f"Error loading card image: {card_path}")
 
+def print_no_cards_message():
+    global last_message_is_not_found
+    if last_message_is_not_found == True:
+        print('\r' + f"No valid card images found (Attempt {attempt_counter})", end="")        
+    else :  
+        print(f"No valid card images found (Attempt {attempt_counter})")   
+        last_message_is_not_found = True;
 
 def search_card(screenshot, card):
     # cv2.imshow("Captured Screenshot", screenshot)
@@ -58,14 +70,14 @@ def add_card_if_not_exists(found_cards, found_card, is_player):
         if found_card not in found_cards:
             found_cards.append(found_card)
 
-if not cards_images:
-    print("No valid card images found.")
+if not cards_images:        
+    print_no_cards_message()
+    attempt_counter += 1
 
 else:
 
-    if __name__ == '__main__':
-       
-
+    if __name__ == '__main__':                  
+        attempt_counter = 0
         # # Define the region of interest (ROI) coordinates
         # # SMALL SCREEN
         # roi_x_player = 1250  # X-coordinate of the top-left corner of the ROI
@@ -118,20 +130,25 @@ else:
                 print("PLAYER:")
                 card_values = [{card_data["card"]} for card_data in found_cards]
                 print(card_values)
+                last_message_is_not_found = False
+                attempt_counter = 0
             if found_cards_dealer:
                 print("DEALER:")
                 card_values = [{card_data["card"]} for card_data in found_cards_dealer]
                 print(card_values)
-            else:
-                print("No cards found on the screen.")
+                last_message_is_not_found = False
+                attempt_counter = 0
+            else:                
+                print_no_cards_message()
+                attempt_counter += 1
 
-            # Display the captured screen with matches (optional)
-            # cv2.imshow("Screen", screenshot)
+            # Display the captured screen with matches (optional)            
+            #cv2.imshow("Screen", screenshot)
 
 
             # Display the captured screen with matches
-            # cv2.imshow("Screen", screenshot)
-            # cv2.waitKey(0)  # Wait for a key press to close the window
+            #cv2.imshow("Screen", screenshot)
+            #cv2.waitKey(0)  # Wait for a key press to close the window
 
 
             # Exit when 'q' key is pressed
