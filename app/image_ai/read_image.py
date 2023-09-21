@@ -16,7 +16,7 @@ found_cards_dealer = []  # List to store matched cards
 attempt_counter = 1 ##counter of mismatch
 last_message_is_not_found = False
 
-roi_configurations = ["LARGE SCREEN", "SMALL SCREEN", "ALTERNATIVE MONITOR"]
+roi_configurations = ["LARGE_SCREEN", "SMALL_SCREEN", "ALTERNATIVE_MONITOR"]
 
 
 
@@ -87,7 +87,7 @@ def save_screenshots(screenshot):
             
 # Define the region of interest (ROI) coordinates
 def GetRoiDefinitions(configuration):
-    if configuration == "LARGE SCREEN": #currently
+    if configuration == "LARGE_SCREEN":
         return {
             "roi_x_player": 1750,
             "roi_y_player": 900,
@@ -96,7 +96,7 @@ def GetRoiDefinitions(configuration):
             "roi_width": 400,
             "roi_height": 50
         }
-    elif configuration == "SMALL SCREEN":
+    elif configuration == "SMALL_SCREEN":
         return {
             "roi_x_player": 1250,
             "roi_y_player": 650,
@@ -105,7 +105,7 @@ def GetRoiDefinitions(configuration):
             "roi_width": 400,
             "roi_height": 100
         }
-    elif configuration == "ALTERNATIVE MONITOR": 
+    elif configuration == "ALTERNATIVE_MONITOR": 
         return {
             "roi_x_player": 960,
             "roi_y_player": 778,
