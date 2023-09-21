@@ -1,44 +1,37 @@
 import unittest
 import cv2
 import os
-import numpy as np
+#import numpy as np
 import sys
-import logging
-
 
 # Add the parent directory of 'bjcounter' to the sys.path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-print(parent_dir);
+print(parent_dir)
 sys.path.append(parent_dir)
 
+parent_dir2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..','app','image_ai'))
+print(parent_dir2)
+sys.path.append(parent_dir2)
+
 # Now you can use relative imports as usual
+from app.image_ai import configuration; 
+from app.image_ai import image_handler; 
 from app.image_ai import read_image; 
 
 class CardDetectionTest(unittest.TestCase):
+    
     def setUp(self):
-        # Load the card images from your directory
-        cards_dir = os.path.abspath(os.path.join(parent_dir, 'app', 'image_ai', 'card_images_800x600'))
-        print(cards_dir);
-        logging.info(cards_dir);
-        self.cards_images = []
-        for filename in os.listdir(cards_dir):
-            if filename.endswith(".png"):
-                card_path = os.path.abspath(os.path.join(cards_dir, filename))
-                card_gray = cv2.imread(card_path, cv2.IMREAD_GRAYSCALE)
-                if card_gray is not None:
-                    self.cards_images.append((card_gray, filename))
-                else:
-                    print(f"Error loading card image: {card_path}")
+        # Load the card images from your directory        
 
+        self.cards_images = image_handler.load_cards(configuration.PathDefinition.TEST);
+        
     def crop_image(self, image, x, y, width, height):
         return image[y:y+height, x:x+width]
     def test_card_detection(self):
         # Provide a sample filename for the image to be tested
-        test_image_filename = os.path.abspath(os.path.join(parent_dir, 'tests', 'image_recon','800x600' , 'image1B.png'))  # Replace with the actual path
-       
+        test_image_filename = os.path.abspath(os.path.join(parent_dir, 'tests', 'image_recon','800x600' , 'image1B.png'))  # Replace with the actual path       
         #load Definitions        
-        roi_definitions = read_image.GetRoiDefinitions(read_image.roi_configurations[3])
-
+        roi_definitions = configuration.roi_definitions(configuration.ResolutionConfiguration.RESOLUTION_800_600);
 
         # Load the test image
         test_image_bf = cv2.imread(test_image_filename)
@@ -48,7 +41,7 @@ class CardDetectionTest(unittest.TestCase):
 
         test_image = self.crop_image(test_image_bf,roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"])               
         
-        #read_image.save_screenshots(test_image);
+        #image_handler.save_screenshots(test_image);
 
         if len(test_image.shape) == 2 or (len(test_image.shape) == 3 and test_image.shape[2] == 1):
             # Image is already grayscale, no need to convert
@@ -58,7 +51,7 @@ class CardDetectionTest(unittest.TestCase):
             grayscale_image = cv2.cvtColor(test_image, cv2.COLOR_BGR2GRAY)
     
         #print(grayscale_image)
-        #read_image.save_screenshots(grayscale_image);
+        #image_handler.save_screenshots(grayscale_image);
 
         # Ensure that the test image has been loaded successfully        
 

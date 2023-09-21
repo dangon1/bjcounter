@@ -1,31 +1,13 @@
 import cv2
-import numpy as np
-import pyautogui
-import curses
-import uuid
-
-# Load the template image
-import os
+import image_handler
+import configuration
 # print("Current Directory:", os.getcwd())
 
-# Load all card images from the folder into an array
-cards_dir = os.path.join(os.getcwd(), 'app', 'image_ai', 'card_images_800x600')
 cards_images = []
 found_cards = []  # List to store matched cards
 found_cards_dealer = []  # List to store matched cards
 attempt_counter = 1 ##counter of mismatch
 last_message_is_not_found = False
-
-roi_configurations = ["LARGE_SCREEN", "SMALL_SCREEN", "ALTERNATIVE_MONITOR","800v600"]
-
-for filename in os.listdir(cards_dir):
-    if filename.endswith(".png"):
-        card_path = os.path.join(cards_dir, filename)
-        card_gray = cv2.imread(card_path, cv2.IMREAD_GRAYSCALE)
-        if card_gray is not None:
-            cards_images.append((card_gray, filename))
-        else:
-            print(f"Error loading card image: {card_path}")
 
 def print_no_cards_message():
     global last_message_is_not_found
@@ -76,91 +58,23 @@ def add_card_if_not_exists(found_cards, found_card, is_player):
         if found_card not in found_cards:
             found_cards.append(found_card)
 
-def save_screenshots(screenshot):
-    # Generate unique filenames using UUID
-    screenshot_filename = f"screenshot_{uuid.uuid4()}.png"    
+if __name__ == '__main__':   
+    #Load Cards
+    cards_images = image_handler.load_cards(configuration.PathDefinition.PRODUCTION);
 
-    cv2.imwrite(screenshot_filename, screenshot)    
-            
-# Define the region of interest (ROI) coordinates
-def GetRoiDefinitions(configuration):
-    if configuration == "LARGE_SCREEN":
-        return {
-            "roi_x_player": 1750,
-            "roi_y_player": 900,
-            "roi_x_dealer": 1450,
-            "roi_y_dealer": 650,
-            "roi_width": 400,
-            "roi_height": 50
-        }
-    elif configuration == "SMALL_SCREEN":
-        return {
-            "roi_x_player": 1250,
-            "roi_y_player": 650,
-            "roi_x_dealer": 1100,
-            "roi_y_dealer": 480,
-            "roi_width": 400,
-            "roi_height": 100
-        }
-    elif configuration == "ALTERNATIVE_MONITOR": 
-        return {
-            "roi_x_player": 960,
-            "roi_y_player": 778,
-            "roi_x_dealer": 943,
-            "roi_y_dealer": 603,
-            "roi_width": 400,
-            "roi_height": 31
-        }
-    elif configuration == "800v600": 
-        return {
-            "roi_x_player": 393,
-            "roi_y_player": 446,
-            "roi_x_dealer": 390,
-            "roi_y_dealer": 373,
-            "roi_width": 400,
-            "roi_height": 31
-        }
-    else:
-        raise ValueError("Invalid configuration type")
-
-if not cards_images:        
-    print_no_cards_message()
-    attempt_counter += 1
-
-else:
-
-    if __name__ == '__main__':                   
+    if not cards_images:        
+        print("There are no cards to be look at. End.")       
+    else:                
         attempt_counter = 0
-        # Change this to select the desired configuration
-        chosen_configuration = roi_configurations[3]  
-        roi_definitions = GetRoiDefinitions(chosen_configuration)
-
-        while True:
-            # Capture the screen
-            # screenshot = pyautogui.screenshot()            
-
-            #screenshot2 = pyautogui.screenshot(region=(0, 0,800,600))        
-            #screenshot2 = np.array(screenshot2)
-            #screenshot2_g = cv2.cvtColor(screenshot2, cv2.COLOR_BGR2GRAY)
-            #save_screenshots(screenshot2);    
-            #save_screenshots(screenshot2_g);    
-            
-            screenshot = pyautogui.screenshot(region=(roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"]))            
-            screenshot = np.array(screenshot)                     
-
-            #save_screenshots(screenshot);
-            screenshot_gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
-            #save_screenshots(screenshot_gray);
-        
-            screenshot_dealer = pyautogui.screenshot(region=(roi_definitions["roi_x_dealer"], roi_definitions["roi_y_dealer"], roi_definitions["roi_width"], roi_definitions["roi_height"]))
-            screenshot_dealer = np.array(screenshot_dealer)
-            screenshot_dealer_gray = cv2.cvtColor(screenshot_dealer, cv2.COLOR_BGR2GRAY)
-       
+    
+        while True:      
+            screenshot_gray,screenshot_dealer_gray = image_handler.take_screenshot();
+   
             # Iterate through each template and perform template matching
             for card_gray, card_name in cards_images:
                 #cv2.imshow("Card to match", card_gray)
                 #cv2.waitKey(0)
-            
+        
                 # Checking player cards
                 found_card = search_card(screenshot_gray, card_gray , card_name)
                 add_card_if_not_exists(found_cards, found_card, True)
@@ -193,8 +107,8 @@ else:
             #cv2.imshow("Screen", screenshot)            
             #cv2.imshow("Screen2", screenshot_dealer)
             #cv2.waitKey(0)  # Wait for a key press to close the window            
-             
-            #save_screenshots(screenshot);                      
+         
+            #image_handler.save_screenshots(screenshot);                      
 
             # Exit when 'q' key is pressed
             if cv2.waitKey(1) == ord('q'):
