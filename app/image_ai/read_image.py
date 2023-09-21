@@ -9,17 +9,14 @@ import os
 # print("Current Directory:", os.getcwd())
 
 # Load all card images from the folder into an array
-cards_dir = os.path.join(os.getcwd(), 'app', 'image_ai', 'card_images_large_screen_h_small')
+cards_dir = os.path.join(os.getcwd(), 'app', 'image_ai', 'card_images_800x600')
 cards_images = []
 found_cards = []  # List to store matched cards
 found_cards_dealer = []  # List to store matched cards
 attempt_counter = 1 ##counter of mismatch
 last_message_is_not_found = False
 
-roi_configurations = ["LARGE_SCREEN", "SMALL_SCREEN", "ALTERNATIVE_MONITOR"]
-
-
-
+roi_configurations = ["LARGE_SCREEN", "SMALL_SCREEN", "ALTERNATIVE_MONITOR","800v600"]
 
 for filename in os.listdir(cards_dir):
     if filename.endswith(".png"):
@@ -112,7 +109,16 @@ def GetRoiDefinitions(configuration):
             "roi_x_dealer": 943,
             "roi_y_dealer": 603,
             "roi_width": 400,
-            "roi_height": 50
+            "roi_height": 31
+        }
+    elif configuration == "800v600": 
+        return {
+            "roi_x_player": 393,
+            "roi_y_player": 446,
+            "roi_x_dealer": 390,
+            "roi_y_dealer": 373,
+            "roi_width": 400,
+            "roi_height": 31
         }
     else:
         raise ValueError("Invalid configuration type")
@@ -126,16 +132,25 @@ else:
     if __name__ == '__main__':                   
         attempt_counter = 0
         # Change this to select the desired configuration
-        chosen_configuration = roi_configurations[0]  
+        chosen_configuration = roi_configurations[3]  
         roi_definitions = GetRoiDefinitions(chosen_configuration)
 
         while True:
             # Capture the screen
             # screenshot = pyautogui.screenshot()            
+
+            #screenshot2 = pyautogui.screenshot(region=(0, 0,800,600))        
+            #screenshot2 = np.array(screenshot2)
+            #screenshot2_g = cv2.cvtColor(screenshot2, cv2.COLOR_BGR2GRAY)
+            #save_screenshots(screenshot2);    
+            #save_screenshots(screenshot2_g);    
             
-            screenshot = pyautogui.screenshot(region=(roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"]))
-            screenshot = np.array(screenshot)
+            screenshot = pyautogui.screenshot(region=(roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"]))            
+            screenshot = np.array(screenshot)                     
+
+            #save_screenshots(screenshot);
             screenshot_gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+            #save_screenshots(screenshot_gray);
         
             screenshot_dealer = pyautogui.screenshot(region=(roi_definitions["roi_x_dealer"], roi_definitions["roi_y_dealer"], roi_definitions["roi_width"], roi_definitions["roi_height"]))
             screenshot_dealer = np.array(screenshot_dealer)
