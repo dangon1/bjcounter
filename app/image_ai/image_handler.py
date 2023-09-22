@@ -30,29 +30,33 @@ def save_screenshots(screenshot):
 
     cv2.imwrite(screenshot_filename, screenshot)               
 
-def take_screenshot():   
+def take_screenshot(resolution_configuration):   
     # Capture the screen
     # screenshot = pyautogui.screenshot()            
 
+    #Use this to print actual screen for testing purpuses
     #screenshot2 = pyautogui.screenshot(region=(0, 0,800,600))        
     #screenshot2 = np.array(screenshot2)
     #screenshot2_g = cv2.cvtColor(screenshot2, cv2.COLOR_BGR2GRAY)
-    #image_handler.save_screenshots(screenshot2);    
-    #image_handler.save_screenshots(screenshot2_g);     
+    #save_screenshots(screenshot2);    
+    #save_screenshots(screenshot2_g);     
 
     # Change this to select the desired configuration        
-    roi_definitions = configuration.roi_definitions(configuration.ResolutionConfiguration.RESOLUTION_800_600);
+    roi_definitions = configuration.roi_definitions(resolution_configuration);
     
     screenshot = pyautogui.screenshot(region=(roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"]))            
     screenshot = np.array(screenshot)                     
 
-    #image_handler.save_screenshots(screenshot);
+    #save_screenshots(screenshot);
     screenshot_gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
-    #image_handler.save_screenshots(screenshot_gray);
+    #save_screenshots(screenshot_gray);
         
     screenshot_dealer = pyautogui.screenshot(region=(roi_definitions["roi_x_dealer"], roi_definitions["roi_y_dealer"], roi_definitions["roi_width"], roi_definitions["roi_height"]))
-    screenshot_dealer = np.array(screenshot_dealer)
-    screenshot_dealer_gray = cv2.cvtColor(screenshot_dealer, cv2.COLOR_BGR2GRAY)
+    screenshot_dealer = np.array(screenshot_dealer)    
+    #save_screenshots(screenshot_dealer);
+    
+    screenshot_dealer_gray = cv2.cvtColor(screenshot_dealer, cv2.COLOR_BGR2GRAY)    
+    #save_screenshots(screenshot_dealer_gray);
     
     return screenshot_gray,screenshot_dealer_gray
 
@@ -62,6 +66,24 @@ def image_test_from_file(test_image_filename_url,resolution_configuration):
 
     # Load the test image
     test_image_bf = cv2.imread(test_image_filename_url)
+    
+    
+
+#    # Draw rectangles on the image to highlight player and dealer regions
+#    color_player = (0, 255, 0)  # Green color
+#    color_dealer = (0, 0, 255)  # Red color
+#    thickness = 2  # Thickness of the rectangle
+#
+#    # Draw the player rectangle
+#    cv2.rectangle(test_image_bf, (roi_definitions["roi_x_player"], roi_definitions["roi_y_player"]),
+#                (roi_definitions["roi_x_player"] + roi_definitions["roi_width"], roi_definitions["roi_y_player"] + roi_definitions["roi_height"]), color_player, thickness)
+#
+#    # Draw the dealer rectangle
+#    cv2.rectangle(test_image_bf, (roi_definitions["roi_x_dealer"], roi_definitions["roi_y_dealer"]),
+#                  (roi_definitions["roi_x_dealer"] + roi_definitions["roi_width"], roi_definitions["roi_y_dealer"] + roi_definitions["roi_height"]), color_dealer, thickness)
+#
+
+#    save_screenshots(test_image_bf);
         
     #player
     player_test_image = crop_image(test_image_bf,roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"])               
@@ -70,8 +92,11 @@ def image_test_from_file(test_image_filename_url,resolution_configuration):
     #dealer
     dealer_test_image = crop_image(test_image_bf,roi_definitions["roi_x_dealer"], roi_definitions["roi_y_dealer"], roi_definitions["roi_width"], roi_definitions["roi_height"])               
     dealer_greyscale_image = image_to_greyscale(dealer_test_image);
+     
+    ##use this to get the print and generate the card
+    #save_screenshots(player_greyscale_image);
+    #save_screenshots(dealer_greyscale_image);
 
-        
     return player_greyscale_image,dealer_greyscale_image;
 
 def crop_image(image, x, y, width, height):

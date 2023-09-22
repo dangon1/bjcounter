@@ -16,7 +16,9 @@ def roi_definitions(resolution_enum):
             "roi_x_dealer": 1450,
             "roi_y_dealer": 650,
             "roi_width": 400,
-            "roi_height": 50
+            "roi_height": 50,
+            "treshhold": 0.97
+            
         }
     elif str(resolution_enum) == str(ResolutionConfiguration.SMALL_SCREEN):
         return {
@@ -25,7 +27,8 @@ def roi_definitions(resolution_enum):
             "roi_x_dealer": 1100,
             "roi_y_dealer": 480,
             "roi_width": 400,
-            "roi_height": 100
+            "roi_height": 100,
+            "treshhold": 0.97
         }
     elif str(resolution_enum) == str(ResolutionConfiguration.ALTERNATIVE_MONITOR): 
         return {
@@ -34,16 +37,18 @@ def roi_definitions(resolution_enum):
             "roi_x_dealer": 943,
             "roi_y_dealer": 603,
             "roi_width": 400,
-            "roi_height": 31
+            "roi_height": 31,
+            "treshhold": 0.97
         }
     elif str(resolution_enum) == str(ResolutionConfiguration.RESOLUTION_800_600):
         return {
             "roi_x_player": 393,
-            "roi_y_player": 446,
-            "roi_x_dealer": 265,
-            "roi_y_dealer": 327,
+            "roi_y_player": 443,
+            "roi_x_dealer": 240,
+            "roi_y_dealer": 292,
             "roi_width": 400,
-            "roi_height": 31
+            "roi_height": 31,
+            "treshhold": 0.989
         }
     else:
         raise ValueError("Invalid configuration type")
