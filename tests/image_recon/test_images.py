@@ -25,33 +25,17 @@ class CardDetectionTest(unittest.TestCase):
 
         self.cards_images = image_handler.load_cards(configuration.PathDefinition.TEST);
         
-    def crop_image(self, image, x, y, width, height):
-        return image[y:y+height, x:x+width]
     def test_card_detection(self):
+
+
         # Provide a sample filename for the image to be tested
-        test_image_filename = os.path.abspath(os.path.join(parent_dir, 'tests', 'image_recon','800x600' , 'image1B.png'))  # Replace with the actual path       
-        #load Definitions        
-        roi_definitions = configuration.roi_definitions(configuration.ResolutionConfiguration.RESOLUTION_800_600);
-
-        # Load the test image
-        test_image_bf = cv2.imread(test_image_filename)
+        player_test_image_filename = os.path.abspath(os.path.join(parent_dir, 'tests', 'image_recon','800x600' , 'image1B.png'))  # Replace with the actual path             
         
-        self.assertIsNotNone(test_image_bf, f"Error loading test image: {test_image_filename}")
-
-
-        test_image = self.crop_image(test_image_bf,roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"])               
-        
-        #image_handler.save_screenshots(test_image);
-
-        if len(test_image.shape) == 2 or (len(test_image.shape) == 3 and test_image.shape[2] == 1):
-            # Image is already grayscale, no need to convert
-            grayscale_image = test_image
-        else:
-            # Convert the color image to grayscale
-            grayscale_image = cv2.cvtColor(test_image, cv2.COLOR_BGR2GRAY)
+        #get the cut of the apporpriated configured size for player and dealer cards
+        grayscale_image_player,grayscale_image_dealer = image_handler.image_test_from_file(player_test_image_filename,configuration.ResolutionConfiguration.RESOLUTION_800_600);          
     
-        #print(grayscale_image)
-        #image_handler.save_screenshots(grayscale_image);
+        print(grayscale_image_dealer)
+        image_handler.save_screenshots(grayscale_image_dealer);
 
         # Ensure that the test image has been loaded successfully        
 
@@ -63,13 +47,11 @@ class CardDetectionTest(unittest.TestCase):
         for card_gray, card_name in self.cards_images:
             # Call the search_card function with the test image and template card image            
             
-            found_card_player = read_image.search_card(grayscale_image, card_gray,card_name)
+            found_card_player = read_image.search_card(grayscale_image_player, card_gray,card_name)
             read_image.add_card_if_not_exists(found_cards, found_card_player, True)
 
-            #not being tested YET
-            #found_card_dealer = read_image.search_card(grayscale_image, card_gray,card_name)
-            found_card_dealer = []
-            #read_image.add_card_if_not_exists(found_cards_dealer, found_card_dealer, False)
+            found_card_dealer = read_image.search_card(grayscale_image_dealer, card_gray,card_name)            
+            read_image.add_card_if_not_exists(found_cards_dealer, found_card_dealer, False)
 
         # Perform your assertions here to validate the results
         # For example, you can assert that certain cards were found in the test image:

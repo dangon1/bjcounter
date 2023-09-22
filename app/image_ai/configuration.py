@@ -40,8 +40,8 @@ def roi_definitions(resolution_enum):
         return {
             "roi_x_player": 393,
             "roi_y_player": 446,
-            "roi_x_dealer": 390,
-            "roi_y_dealer": 373,
+            "roi_x_dealer": 265,
+            "roi_y_dealer": 327,
             "roi_width": 400,
             "roi_height": 31
         }

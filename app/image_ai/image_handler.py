@@ -55,5 +55,36 @@ def take_screenshot():
     screenshot_dealer_gray = cv2.cvtColor(screenshot_dealer, cv2.COLOR_BGR2GRAY)
     
     return screenshot_gray,screenshot_dealer_gray
-            
-            
+
+def image_test_from_file(test_image_filename_url,resolution_configuration):
+    #load Definitions        
+    roi_definitions = configuration.roi_definitions(resolution_configuration);
+
+    # Load the test image
+    test_image_bf = cv2.imread(test_image_filename_url)
+        
+    #player
+    player_test_image = crop_image(test_image_bf,roi_definitions["roi_x_player"], roi_definitions["roi_y_player"], roi_definitions["roi_width"], roi_definitions["roi_height"])               
+    player_greyscale_image = image_to_greyscale(player_test_image);
+    
+    #dealer
+    dealer_test_image = crop_image(test_image_bf,roi_definitions["roi_x_dealer"], roi_definitions["roi_y_dealer"], roi_definitions["roi_width"], roi_definitions["roi_height"])               
+    dealer_greyscale_image = image_to_greyscale(dealer_test_image);
+
+        
+    return player_greyscale_image,dealer_greyscale_image;
+
+def crop_image(image, x, y, width, height):
+    return image[y:y+height, x:x+width]
+        
+        
+def image_to_greyscale(image):
+    if len(image.shape) == 2 or (len(image.shape) == 3 and image.shape[2] == 1):
+        # Image is already grayscale, no need to convert
+        grayscale_image = image
+    else:
+        # Convert the color image to grayscale
+        grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)           
+    return grayscale_image        
+       
+                
